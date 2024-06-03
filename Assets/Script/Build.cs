@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 //using UnityEngine.XR.Interaction.Toolkit;
 
 
@@ -126,20 +127,24 @@ public class Build : PressINputBase
                                 notesManager.gOname.GetComponentInChildren<TMP_Text>().text = selectedGo.transform.gameObject.name;
                             notesManager.gOpos.GetComponentInChildren<TMP_Text>().text = (selectedGo.transform.localPosition).ToString();
                         }
-                        else
-                        {
+                       
+                        
                             if (loaderSc.isInColorMode)
                             {
-                                if (selectedGo.GetComponent<Changes>())
+                    Debug.Log("In color Mode");
+                                if (selectedGo.GetComponentInChildren<Changes>())
                                 {
-                                    selectedGo.GetComponent<Changes>().ChangeColor();
+                                    selectedGo.GetComponentInChildren<Changes>().ChangeColor();
                                 }
                                 else
                                 {
-                                    selectedGo.AddComponent<Changes>().ChangeColor();
+                                    if(selectedGo.GetComponent<Renderer>())
+                                        selectedGo.AddComponent<Changes>().ChangeColor();
+                                    else if(selectedGo.GetComponentInChildren<Renderer>())
+                                        selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
                                 }
                             }
-                        }
+                       
 
                     contactService.commCube.GetComponent<Image>().color = Color.white;
                 }
@@ -160,6 +165,21 @@ public class Build : PressINputBase
         }
     }
 
+
+    public void Clear()
+    {
+        string layerName = loaderSc.layerTitleText.text;
+        if (DoesTagExist(layerName))
+        {
+            GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
+            foreach (var block in blocks)
+            {
+                Destroy(block.gameObject);
+            }
+        }
+    }
+
+
     public void OnLayerEn()
     {
         GetLayerListByName();
@@ -176,18 +196,20 @@ public class Build : PressINputBase
         
         foreach (var layer in layers)
         {
-           
-            Debug.Log("Layers: "+layer.layername);
-            var nN = Instantiate(listItem, savedContent.transform);
-           nN.transform.SetSiblingIndex(0);
-            nN.transform.GetComponentInChildren<TMP_Text>().text = layer.layername+" " +layer.start;
-            nN.gameObject.name = layer.model;
-            nN.gameObject.AddComponent<LoadLayer>().data = layer.model;
-            
-            nN.gameObject.GetComponent<LoadLayer>().data2 = layer.layername;
-            
-            nN.gameObject.GetComponent<LoadLayer>().btn = nN;
-            nN.onClick.AddListener(() => nN.gameObject.GetComponent<LoadLayer>().Loading());
+            if (layer.model.Contains("objectType"))
+            {
+                Debug.Log("Layers: " + layer.layername);
+                var nN = Instantiate(listItem, savedContent.transform);
+                nN.transform.SetSiblingIndex(0);
+                nN.transform.GetComponentInChildren<TMP_Text>().text = layer.layername + " " + layer.start;
+                nN.gameObject.name = layer.model;
+                nN.gameObject.AddComponent<LoadLayer>().data = layer.model;
+
+                nN.gameObject.GetComponent<LoadLayer>().data2 = layer.layername;
+
+                nN.gameObject.GetComponent<LoadLayer>().btn = nN;
+                nN.onClick.AddListener(() => nN.gameObject.GetComponent<LoadLayer>().Loading());
+            }
         }
     }
 
@@ -281,4 +303,5 @@ public class Build : PressINputBase
         return project.name; 
     }
 
+    
 }

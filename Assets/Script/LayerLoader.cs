@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using Newtonsoft.Json;
 
 using Newtonsoft.Json.Serialization;
+using Unity.VisualScripting;
 
 [Serializable]
 public class LayerItem
@@ -76,9 +77,9 @@ public class LayerLoader : MonoBehaviour
         else if(layer.Contains("Item"))//with jsonHelper
         {
             Debug.Log("it is indeed full of items");
-            
 
-            LayerInfoToLayer(layer, parentObject, layerName);
+            if (layer.Contains("objectType"))
+                LayerInfoToLayer(layer, parentObject, layerName);
         }
         else if (layer.Contains("htt"))
         {
@@ -99,46 +100,37 @@ public class LayerLoader : MonoBehaviour
         foreach (var layerItem in layerItemList)
         {
             LayerItem lItem = JsonUtility.FromJson<LayerItem>(layerItem);
-           // Debug.Log(" item type: " + layerItem);
             for (int i = 0; i < prefabs.Count; i++)
             {
-                //Debug.Log(" prefabs[i].name: " + prefabs[i].name);
                 if (lItem.objectType.Contains(prefabs[i].name))
                 {
-                       // Debug.Log("contains prefabs[i].name: " + prefabs[i].name);
-                        item = Instantiate(prefabs[i]);
+                    item = Instantiate(prefabs[i]);
                     item.tag = layerName;
-                    Debug.Log("item.tag: " + item.tag);
                     item.name = lItem.objectType;
                     item.transform.parent = parentObject.transform;
                     var transfromArray= JsonHelper.FromJson<String>(lItem.transform);
 
                     item.transform.localPosition = JsonUtility.FromJson<Vector3>(transfromArray[0]);
-                    //Debug.Log("pos: " + item.transform.position);
                     item.transform.localRotation = JsonUtility.FromJson<Quaternion>(transfromArray[1]);
-                    //Debug.Log("rot: " + item.transform.rotation);
                     item.transform.localScale = JsonUtility.FromJson<Vector3>(transfromArray[2]);
-                   // Debug.Log("scale: " + item.transform.lossyScale);
-                    item.AddComponent<Changes>().ogMaterial = item.GetComponent<Renderer>().material;
-                    item.GetComponentInChildren<Renderer>().material.color = lItem.color;
-                    if (lItem.color == Color.white)
+                    //Debug.Log("Pos: " + transfromArray[0] + "got Pos: " + item.transform.localPosition.ToString() + " Rot: " + transfromArray[1] + " got Rot: " + item.transform.localRotation.ToString());
+                    if (item.GetComponent<Renderer>())
+                        item.AddComponent<Changes>().ogMaterial = item.GetComponent<Renderer>().material;
+                    /*else if (item.GetComponentInChildren<Renderer>())
                     {
-                        Color changeA = item.GetComponentInChildren<Renderer>().material.color;
-                        changeA.a = 0.4f;
-                        item.GetComponentInChildren<Renderer>().material.color= changeA;
-                    }
+                        item.transform.GetChild(1).AddComponent<Changes>().ogMaterial = item.transform.GetChild(1).GetComponent<Renderer>().material;
+                    }*/
+                    item.GetComponentInChildren<Renderer>().material.color = lItem.color;
+
                 }
             }
-            
         }
 
-  if(item == null) 
+            if(item == null) 
             {
-               
-                contactService.commCube.GetComponent<Renderer>().material.color = Color.red;
-            Debug.Log("couldnt find match in layer recreation ");
-
-        }
+                contactService.commCube.GetComponent<Image>().color = Color.red;
+                Debug.Log("couldnt find match in layer recreation ");
+             }
 
        
     }
@@ -148,7 +140,7 @@ public class LayerLoader : MonoBehaviour
     {
         string[] transformArray =new string[3];
         transformArray[0]= JsonUtility.ToJson(transform.localPosition);
-        transformArray[1] = JsonUtility.ToJson(transform.rotation);
+        transformArray[1] = JsonUtility.ToJson(transform.localRotation);
         transformArray[2] = JsonUtility.ToJson(transform.lossyScale);
 
         return JsonHelper.ToJson(transformArray);
@@ -185,8 +177,9 @@ public class LayerLoader : MonoBehaviour
     {
         //layerName = authMSc.userData.name;
         Debug.Log("LayerName: " + layerName);
-        GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
-        //List<string> upBlocks = new List<string>();//(new string[blocks.Length]);//new LayerItem[blocks.Length];
+        GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName); 
+        if (blocks.Length == 0)
+            return 0.ToString();
         string[] upBlocks = new string[blocks.Length];
         //int i = 0;
         
@@ -216,6 +209,8 @@ public class LayerLoader : MonoBehaviour
     {
         layerName = layerTitleText.text;//"Arnold A.";//authMSc.userData.name;
         var doneModelArray = SaveBlocks(layerName);
+        if (doneModelArray == 0.ToString())
+            return;
         Debug.Log("doneModelArray: " + doneModelArray);
         
         //var jlayer = JsonUtility.ToJson(doneModelArray);

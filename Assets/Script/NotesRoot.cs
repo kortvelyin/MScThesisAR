@@ -9,7 +9,7 @@ public class NotesInRoot
     public string user_id { get; set; }
     public string title { get; set; }
     public string text { get; set; }
-    public string @object { get; set; }
+    public string gobject { get; set; }
     public string project_id { get; set; }
     public string position { get; set; }
 }
