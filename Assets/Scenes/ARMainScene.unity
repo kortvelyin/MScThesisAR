@@ -2313,7 +2313,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 240467500496382275, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -7.500206
+      value: -7.5001984
       objectReference: {fileID: 0}
     - target: {fileID: 1100049295395682557, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_LineType
@@ -2357,7 +2357,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1397159741425067009, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.80002785
+      value: 0.80002594
       objectReference: {fileID: 0}
     - target: {fileID: 1505939683613134988, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2465,7 +2465,7 @@ PrefabInstance:
       objectReference: {fileID: 40919616}
     - target: {fileID: 2830934188963533276, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.9998398
+      value: -0.99983215
       objectReference: {fileID: 0}
     - target: {fileID: 2855214865234436929, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_Name
@@ -2557,7 +2557,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3765507456500850999, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -7.500206
+      value: -7.5001984
       objectReference: {fileID: 0}
     - target: {fileID: 3878593884602736777, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2569,7 +2569,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4274543061672413093, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.93574715
+      value: -0.93574524
       objectReference: {fileID: 0}
     - target: {fileID: 4472099815804858666, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_SizeDelta.x
@@ -2601,11 +2601,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5611649424492045471, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 5.4147644
+      value: 5.414734
       objectReference: {fileID: 0}
     - target: {fileID: 5611649424492045471, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 52.544556
+      value: 52.54457
       objectReference: {fileID: 0}
     - target: {fileID: 5646791286249185191, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -2769,7 +2769,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6519662444743036749, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.3193283
+      value: -0.31932068
       objectReference: {fileID: 0}
     - target: {fileID: 6519662444743036749, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2777,7 +2777,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6559955533540376492, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.0700078
+      value: -0.07000828
       objectReference: {fileID: 0}
     - target: {fileID: 7006021837345474958, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2793,7 +2793,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7869908182639408107, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.80002785
+      value: 0.80002594
       objectReference: {fileID: 0}
     - target: {fileID: 7887421159842621594, guid: c748f87c2fa85f643b4516537ac29acd, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -7291,6 +7291,7 @@ MonoBehaviour:
   savedUI: {fileID: 5931067289597432810}
   listUI: {fileID: 8149780129417067657}
   listItem: {fileID: 1302453097221575638, guid: e75d388cd17b8394c89bc4e9e443052d, type: 3}
+  arSessionOrigin: {fileID: 894894863}
   arCamera: {fileID: 105281356}
   selectedGo: {fileID: 0}
   coordinateSystemPos: {x: 0, y: 0, z: 0}

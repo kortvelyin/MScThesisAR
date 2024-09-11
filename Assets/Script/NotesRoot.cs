@@ -3,16 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-public class NotesInRoot
-{
-    public int ID { get; set; }
-    public string user_id { get; set; }
-    public string title { get; set; }
-    public string text { get; set; }
-    public string gobject { get; set; }
-    public string project_id { get; set; }
-    public string position { get; set; }
-}
 
 public class NotesRoot
 {

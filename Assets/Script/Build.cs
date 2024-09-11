@@ -10,6 +10,7 @@ using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.EventSystems;
 using Unity.VisualScripting;
+using Unity.XR.CoreUtils;
 //using UnityEngine.XR.Interaction.Toolkit;
 
 
@@ -40,6 +41,7 @@ public class Build : PressINputBase
     authManager authMSc;
     RaycastHit intHit;
     bool isPressed;
+    public XROrigin arSessionOrigin;
     public Camera arCamera;
 
     [HideInInspector]
@@ -58,6 +60,7 @@ public class Build : PressINputBase
 
     void Start()
     {
+        arCamera = arSessionOrigin.Camera;
         loaderSc = GameObject.Find("Building").GetComponent<LayerLoader>();
         contactService = GameObject.Find("AuthManager").GetComponent<ContactService>();
         //xRManager= GetComponent<XRInteractionManager>();
@@ -78,79 +81,65 @@ public class Build : PressINputBase
             coordinateSystemPos = GameObject.Find("CoordinateSystem").transform.position; 
             isCoordinateSystemSet=true;
         }
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
 
-         if (Pointer.current==null||isPressed==false)
+            // Only process the touch when it begins
+            if (touch.phase == UnityEngine.TouchPhase.Began)
             {
-                return;
-            }
+                var touchPosition = touch.position;
 
-         var touchPosition = Pointer.current.position.ReadValue();
-        
-        if (isInBuildMode && !EventSystem.current.IsPointerOverGameObject())
-        {
-            BuildBlocks();
-
-           
-                Debug.Log("Sensed Something 0");
-               // var hitPose = m_Hits[0].pose;
-                //m_Hits[0].trackable.gameObject.GetComponent<MeshRenderer>().material.color = Color.blue;
-                /*if(spawnedObject==null)
+                if (isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
-                    spawnedObject = Instantiate(spawnedPrefab, hitPose.position, hitPose.rotation);
+                    BuildBlocks();
+
+                    Debug.Log("Sensed Something 0");
                 }
-                else
+                else if (!isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
-                    spawnedObject.transform.position = hitPose.position;
-                    spawnedObject.transform.rotation=hitPose.rotation;
-                }*/
-            
-           
-            
-        } 
-        else if (!isInBuildMode )//&& interactor.TryGetCurrent3DRaycastHit(out intHit))
-        {
-        
-                Ray ray = arCamera.ScreenPointToRay(touchPosition);
-                if (Physics.Raycast(ray,out RaycastHit hit, Mathf.Infinity) && !EventSystem.current.IsPointerOverGameObject())
-                {
-
-                    contactService.commCube.GetComponent<Image>().color = Color.blue;                // blue if hit
-                        if (selectedGo != hit.transform.gameObject)
+                    Ray ray = arCamera.ScreenPointToRay(touchPosition);
+                    if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
+                    {
+                        contactService.commCube.GetComponent<Image>().color = Color.blue; // blue if hit
+                        GameObject hitObject = hit.transform.gameObject;
+                        if (selectedGo != hitObject)
                         {
                             if (selectedGo != null)
                             {
-                        selectedGo.transform.gameObject.GetComponent<MeshRenderer>().material.EnableKeyword("_EMISSION");
-                        selectedGo.transform.gameObject.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white * 0.0f); }
-                            selectedGo = hit.transform.gameObject;
-                            selectedGo.transform.gameObject.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.cyan * 0.4f);
-                            if (notesManager.gOname)
-                                notesManager.gOname.GetComponentInChildren<TMP_Text>().text = selectedGo.transform.gameObject.name;
-                            notesManager.gOpos.GetComponentInChildren<TMP_Text>().text = (selectedGo.transform.localPosition).ToString();
-                        }
-                       
-                        
-                            if (loaderSc.isInColorMode)
-                            {
-                    Debug.Log("In color Mode");
-                                if (selectedGo.GetComponentInChildren<Changes>())
-                                {
-                                    selectedGo.GetComponentInChildren<Changes>().ChangeColor();
-                                }
-                                else
-                                {
-                                    if(selectedGo.GetComponent<Renderer>())
-                                        selectedGo.AddComponent<Changes>().ChangeColor();
-                                    else if(selectedGo.GetComponentInChildren<Renderer>())
-                                        selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
-                                }
+                                selectedGo.GetComponent<MeshRenderer>().material.EnableKeyword("_EMISSION");
+                                selectedGo.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white * 0.0f);
                             }
-                       
+                            selectedGo = hitObject;
+                            selectedGo.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.cyan * 0.4f);
+                            if (notesManager.gOname)
+                                notesManager.gOname.GetComponentInChildren<TMP_Text>().text = selectedGo.name;
+                            notesManager.gOpos.GetComponentInChildren<TMP_Text>().text = selectedGo.transform.localPosition.ToString();
+                        }
 
-                    contactService.commCube.GetComponent<Image>().color = Color.white;
+                        if (loaderSc.isInColorMode)
+                        {
+                            Debug.Log("In color Mode");
+                            Changes changesComponent = selectedGo.GetComponentInChildren<Changes>();
+                            if (changesComponent != null)
+                            {
+                                changesComponent.ChangeColor();
+                            }
+                            else
+                            {
+                                if (selectedGo.GetComponent<Renderer>())
+                                    selectedGo.AddComponent<Changes>().ChangeColor();
+                                else if (selectedGo.GetComponentInChildren<Renderer>())
+                                    selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
+                            }
+                        }
+
+                        contactService.commCube.GetComponent<Image>().color = Color.white;
+                    }
                 }
-                
-            
+            }
         }
+
     }
 
 
