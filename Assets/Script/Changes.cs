@@ -22,8 +22,8 @@ public class Changes : MonoBehaviour
     void Start()
     {
         ogColor=gameObject.GetComponent<Renderer>().material.color;
-        ogMaterial = this.gameObject.GetComponent<Material>();
-        ogTransform = this.gameObject.transform;
+        ogMaterial = gameObject.GetComponent<Material>();
+        ogTransform = gameObject.transform;
     }
 
    public void ChangeColor()

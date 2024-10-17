@@ -54,19 +54,21 @@ public class LayerLoader : MonoBehaviour
     //klicks projects, get item, call LayerJsonToLayerBegin(string layerName, string layer)
 
 
-    public void LayerJsonToLayerBegin(string layerName, string layer)
+    public List<GameObject> LayerJsonToLayerBegin(string layerName, string layer)
     {
         if(GameObject.Find("CoordinateSystem"))
         Debug.Log("layer: "+layer);
         var parentObject = new GameObject(layerName);
+        List<GameObject> loadedObjects = new List<GameObject>();
 
+
+        // coordinate reset for the showroom to be in the right place
         userParentObject.transform.parent = GameObject.Find("CoordinateSystem").transform;
         userParentObject.transform.localPosition = new Vector3(0, 0, 0);
-        userParentObject.transform.localRotation = Quaternion.EulerRotation(0, 0, 0);
-
+        userParentObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
         parentObject.transform.parent = userParentObject.transform;
         parentObject.transform.localPosition= new Vector3(0, 0, 0);
-        parentObject.transform.localRotation= Quaternion.EulerRotation(0, 0, 0);
+        parentObject.transform.localRotation= Quaternion.Euler(0, 0, 0);
         if (layer.Contains("layeritem"))
         {
             Debug.Log("it is indeed full of layeritems");
@@ -79,7 +81,7 @@ public class LayerLoader : MonoBehaviour
             Debug.Log("it is indeed full of items");
 
             if (layer.Contains("objectType"))
-                LayerInfoToLayer(layer, parentObject, layerName);
+                loadedObjects=LayerInfoToLayer(layer, parentObject, layerName);
         }
         else if (layer.Contains("htt"))
         {
@@ -89,11 +91,13 @@ public class LayerLoader : MonoBehaviour
         {
             Debug.Log("Couldn't find layer type");
         }
+        return loadedObjects;
 
     }
 
-    public void LayerInfoToLayer(string model, GameObject parentObject, string layerName)
+    public List<GameObject> LayerInfoToLayer(string model, GameObject parentObject, string layerName)
     {
+        List<GameObject> loadedObjects = new List<GameObject>();
         var layerItemList = JsonHelper.FromJson<string>(model);
        
         GameObject item = null;
@@ -105,14 +109,22 @@ public class LayerLoader : MonoBehaviour
                 if (lItem.objectType.Contains(prefabs[i].name))
                 {
                     item = Instantiate(prefabs[i]);
+                    loadedObjects.Add(item);
+                    parentObject.tag = layerName; //so that this gets destroyed too
                     item.tag = layerName;
                     item.name = lItem.objectType;
                     item.transform.parent = parentObject.transform;
                     var transfromArray= JsonHelper.FromJson<String>(lItem.transform);
 
                     item.transform.localPosition = JsonUtility.FromJson<Vector3>(transfromArray[0]);
+                    //Debug.Log(item.gameObject.GetInstanceID().ToString()+item.name + item.transform.localPosition.ToString());
                     item.transform.localRotation = JsonUtility.FromJson<Quaternion>(transfromArray[1]);
                     item.transform.localScale = JsonUtility.FromJson<Vector3>(transfromArray[2]);
+                    if(prefabs[i].name=="Cube")
+                    {
+                        Debug.Log("I WAS CALLED");
+                        item.AddComponent<PlaceCubes>().transforms=transfromArray;
+                    }
                     //Debug.Log("Pos: " + transfromArray[0] + "got Pos: " + item.transform.localPosition.ToString() + " Rot: " + transfromArray[1] + " got Rot: " + item.transform.localRotation.ToString());
                     if (item.GetComponent<Renderer>())
                         item.AddComponent<Changes>().ogMaterial = item.GetComponent<Renderer>().material;
@@ -121,6 +133,7 @@ public class LayerLoader : MonoBehaviour
                         item.transform.GetChild(1).AddComponent<Changes>().ogMaterial = item.transform.GetChild(1).GetComponent<Renderer>().material;
                     }*/
                     item.GetComponentInChildren<Renderer>().material.color = lItem.color;
+                    //Debug.Log(item.gameObject.GetInstanceID().ToString() + item.name + item.transform.localPosition.ToString());
 
                 }
             }
@@ -129,10 +142,11 @@ public class LayerLoader : MonoBehaviour
             if(item == null) 
             {
                 contactService.commCube.GetComponent<Image>().color = Color.red;
+            Debug.Log("Item was null, position: "+item.transform.localPosition.ToString());
                 Debug.Log("couldnt find match in layer recreation ");
              }
 
-       
+        return loadedObjects;
     }
 
 
@@ -195,7 +209,6 @@ public class LayerLoader : MonoBehaviour
 
             Destroy(blocks[i].gameObject);
             upBlocks[i]= JsonUtility.ToJson(postLayerI);
-            //Debug.Log("layeriteminpost: " + upBlocks[i]);
         }
         
         var postStrinsArr=JsonHelper.ToJson(upBlocks);

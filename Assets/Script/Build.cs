@@ -81,7 +81,7 @@ public class Build : PressINputBase
             coordinateSystemPos = GameObject.Find("CoordinateSystem").transform.position; 
             isCoordinateSystemSet=true;
         }
-        if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
         {
             Touch touch = Input.GetTouch(0);
 
@@ -94,13 +94,14 @@ public class Build : PressINputBase
                 {
                     BuildBlocks();
 
-                    Debug.Log("Sensed Something 0");
+                    Debug.Log("Sensed Something In Build"); //it should never get here in android
                 }
                 else if (!isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
                     Ray ray = arCamera.ScreenPointToRay(touchPosition);
                     if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                     {
+                        Debug.Log("Touch sensed");
                         contactService.commCube.GetComponent<Image>().color = Color.blue; // blue if hit
                         GameObject hitObject = hit.transform.gameObject;
                         if (selectedGo != hitObject)
@@ -129,8 +130,8 @@ public class Build : PressINputBase
                             {
                                 if (selectedGo.GetComponent<Renderer>())
                                     selectedGo.AddComponent<Changes>().ChangeColor();
-                                else if (selectedGo.GetComponentInChildren<Renderer>())
-                                    selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
+                                //else if (selectedGo.GetComponentInChildren<Renderer>())
+                                   // selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
                             }
                         }
 
@@ -150,6 +151,7 @@ public class Build : PressINputBase
     {
         for (var i = savedContent.transform.childCount - 1; i >= 0; i--)
         {
+            if(savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color==Color.white)
             Destroy(savedContent.transform.GetChild(i).gameObject);
         }
     }
@@ -217,22 +219,24 @@ public class Build : PressINputBase
             if (DoesTagExist(layerName))
             {
                 Debug.Log("IN TAG");
-                loaderSc.LayerJsonToLayerBegin(layerName, layerModel);
-                
+                var loadedObjects=loaderSc.LayerJsonToLayerBegin(layerName, layerModel);
+                button.onClick.AddListener(() => { UnloadLayer(loadedObjects); });
             }
+
         }
         else
         {
             button.transform.GetComponent<Image>().color = Color.white;
-            //check for tag if tag doesnt exist, dont bother
-            if (DoesTagExist(layerName))
-            {
-                GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
-                foreach (var block in blocks)
-                {
-                    Destroy(block.gameObject);
-                }
-            }
+           
+           
+        }
+    }
+
+    public void UnloadLayer(List<GameObject> objects)
+    {
+        foreach(var obj in objects)
+        {
+            Destroy(obj.gameObject);
         }
     }
 

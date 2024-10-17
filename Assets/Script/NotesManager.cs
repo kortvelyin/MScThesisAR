@@ -110,8 +110,8 @@ public class NotesManager : MonoBehaviour
             //The pop ups of the notes as a layer throughout the bulding
             if (GameObject.Find("CoordinateSystem"))
             {
-                
-                if (note.position!=null &&(note.position).Contains("Item"))
+                //check it online
+                if (note.position != null && (note.position).Contains("Item"))
                 {
                     loaderSc.userParentObject.transform.parent = GameObject.Find("CoordinateSystem").transform;
 
@@ -120,12 +120,17 @@ public class NotesManager : MonoBehaviour
                     lN.gameObject.tag = "Note";
                     Debug.Log("note: " + note);
                     var trans = JsonHelper.FromJson<string>(note.position);
-                    
+
+                    lN.AddComponent<PopUpNoteRotation>();
                     lN.transform.GetChild(0).transform.Find("NoteTitle").GetComponent<TMP_Text>().text = note.title;
                     lN.transform.GetChild(0).transform.Find("Creator").GetComponent<TMP_Text>().text = "Creator: " + authSc.GetUserNameByID(Int32.Parse(note.user_id));
                     lN.onClick.AddListener(() => ShowNote(JsonUtility.ToJson(note)));
                     lN.transform.localPosition = JsonConvert.DeserializeObject<Vector3>(trans[0]);
                     lN.transform.localRotation = JsonConvert.DeserializeObject<Quaternion>(trans[1]);
+                    if(lN.transform.localPosition==Vector3.zero)
+                    {
+                        Destroy(lN.gameObject);
+                    }
                 }
             }
         }
@@ -146,23 +151,27 @@ public class NotesManager : MonoBehaviour
     {
         keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.ASCIICapable);
     }
+
+
     public void AddNoteToDB()
     {    
         var goN = Instantiate(layerNote);
         Transform transform= gameObject.transform;
+        string[] trans = new String[2];
         if (buildSc.selectedGo != null)
         {
             Vector3 vec3 = new Vector3(transform.localPosition.x + (transform.localPosition.x - buildSc.selectedGo.transform.localPosition.x) / 2, transform.localPosition.y, transform.localPosition.z);
             goN.transform.localPosition = vec3;
+            trans[0] = JsonUtility.ToJson(goN.transform.localPosition);
+            goN.AddComponent<PopUpNoteRotation>();
         }
         else
-            goN.transform.localPosition = transform.localPosition;
+            trans[0] = JsonUtility.ToJson(Vector3.zero);
+
 
 
         
-        goN.transform.localRotation.SetLookRotation(Camera.main.transform.position);
         
-        string[] trans=new String[2];
         trans[0] = JsonUtility.ToJson(goN.transform.localPosition);
         trans[1]= JsonUtility.ToJson(goN.transform.localRotation);
         var jtrans = JsonHelper.ToJson(trans);
@@ -249,12 +258,13 @@ public class NotesManager : MonoBehaviour
             {
                 UnityEngine.Object.Destroy(savedContext.transform.GetChild(i).gameObject);
             }
-           
+            text.text = "List";
         }
         else
         { newNote.SetActive(false);
         savedNotes.SetActive(true);
             OnGetNoteListbyProjectID("30");
+            text.text = "New";
         }
     }
 
