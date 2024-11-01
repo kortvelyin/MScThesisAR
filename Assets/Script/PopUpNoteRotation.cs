@@ -13,6 +13,6 @@ public class PopUpNoteRotation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.localRotation.SetLookRotation(Camera.main.transform.position);
+        this.transform.localRotation.SetLookRotation(Camera.main.transform.position);
     }
 }

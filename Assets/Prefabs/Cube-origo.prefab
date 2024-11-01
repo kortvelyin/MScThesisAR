@@ -179,6 +179,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7132383138236248428, guid: c15a440627f27f246b295534208d7819, type: 3}
+      propertyPath: m_Name
+      value: dorottyahotel
+      objectReference: {fileID: 0}
     - target: {fileID: 7143575103718331766, guid: c15a440627f27f246b295534208d7819, type: 3}
       propertyPath: m_Name
       value: CoordinateSystem

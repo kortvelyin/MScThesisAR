@@ -1,17 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-//using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Networking;
-//using static UnityEditor.Experimental.GraphView.GraphView;
 using TMPro;
 using UnityEngine.UI;
 using Newtonsoft.Json;
 
-using Newtonsoft.Json.Serialization;
-using Unity.VisualScripting;
+/// <summary>
+/// Main functions to the Build.cs
+/// Functions to convert layer json data to models
+/// and back
+/// LayerItem class
+/// LayerJsonToLayerBegin(string layerName, string layer)
+/// LayerInfoToLayer(string model, GameObject parentObject, string layerName)
+/// TransformStringFromData(Transform transform)
+/// GetAssetBundle(GameObject parent)
+///  SaveBlocks(string layerName = "Cube")
+///  LayerToServer(string layerName = "demo")
+///  ObjectColorModeToggle(Button button)
+/// </summary>
+
 
 [Serializable]
 public class LayerItem
@@ -33,7 +42,7 @@ public class LayerLoader : MonoBehaviour
     public bool isInColorMode;
     public TMP_Text layerTitleText;
 
-    //url is a different thing, its an assetbundle, and a url instead of LayerItem
+
 
     private void Start()
     {
@@ -41,20 +50,15 @@ public class LayerLoader : MonoBehaviour
         
         userParentObject = new GameObject();
         userParentObject.transform.position = new Vector3(0, 0, 0);
-        userParentObject.transform.rotation= Quaternion.EulerRotation(0, 0,0);
+        userParentObject.transform.rotation= Quaternion.Euler(0, 0,0);
         userParentObject.name = "userID";
+        
         contactService = GameObject.Find("AuthManager").GetComponent<ContactService>();
         authMSc = GameObject.Find("AuthManager").GetComponent<authManager>();
-       // LayerToServer("showroom");
+       }
 
-    }
-
-    ////listprojects, string on gO, klick and turn that to blocks
-    ///list projects
-    //klicks projects, get item, call LayerJsonToLayerBegin(string layerName, string layer)
-
-
-    public List<GameObject> LayerJsonToLayerBegin(string layerName, string layer)
+ 
+    public GameObject LayerJsonToLayerBegin(string layerName, string layer)
     {
         if(GameObject.Find("CoordinateSystem"))
         Debug.Log("layer: "+layer);
@@ -71,15 +75,11 @@ public class LayerLoader : MonoBehaviour
         parentObject.transform.localRotation= Quaternion.Euler(0, 0, 0);
         if (layer.Contains("layeritem"))
         {
-            Debug.Log("it is indeed full of layeritems");
-            
-            
+           
             LayerInfoToLayer(layer, parentObject, layerName);
         }
         else if(layer.Contains("Item"))//with jsonHelper
         {
-            Debug.Log("it is indeed full of items");
-
             if (layer.Contains("objectType"))
                 loadedObjects=LayerInfoToLayer(layer, parentObject, layerName);
         }
@@ -91,12 +91,13 @@ public class LayerLoader : MonoBehaviour
         {
             Debug.Log("Couldn't find layer type");
         }
-        return loadedObjects;
+        return parentObject;
 
     }
 
     public List<GameObject> LayerInfoToLayer(string model, GameObject parentObject, string layerName)
     {
+
         List<GameObject> loadedObjects = new List<GameObject>();
         var layerItemList = JsonHelper.FromJson<string>(model);
        
@@ -117,24 +118,21 @@ public class LayerLoader : MonoBehaviour
                     var transfromArray= JsonHelper.FromJson<String>(lItem.transform);
 
                     item.transform.localPosition = JsonUtility.FromJson<Vector3>(transfromArray[0]);
-                    //Debug.Log(item.gameObject.GetInstanceID().ToString()+item.name + item.transform.localPosition.ToString());
                     item.transform.localRotation = JsonUtility.FromJson<Quaternion>(transfromArray[1]);
                     item.transform.localScale = JsonUtility.FromJson<Vector3>(transfromArray[2]);
                     if(prefabs[i].name=="Cube")
                     {
-                        Debug.Log("I WAS CALLED");
+                        Debug.Log("Place Cubes was added");
                         item.AddComponent<PlaceCubes>().transforms=transfromArray;
                     }
-                    //Debug.Log("Pos: " + transfromArray[0] + "got Pos: " + item.transform.localPosition.ToString() + " Rot: " + transfromArray[1] + " got Rot: " + item.transform.localRotation.ToString());
-                    if (item.GetComponent<Renderer>())
-                        item.AddComponent<Changes>().ogMaterial = item.GetComponent<Renderer>().material;
-                    /*else if (item.GetComponentInChildren<Renderer>())
+                   if (item.GetComponent<Renderer>())
                     {
-                        item.transform.GetChild(1).AddComponent<Changes>().ogMaterial = item.transform.GetChild(1).GetComponent<Renderer>().material;
-                    }*/
-                    item.GetComponentInChildren<Renderer>().material.color = lItem.color;
-                    //Debug.Log(item.gameObject.GetInstanceID().ToString() + item.name + item.transform.localPosition.ToString());
-
+                        item.AddComponent<Changes>();//.ogMaterial = item.GetComponent<Renderer>().material;
+                         item.GetComponent<Changes>().gotColor = lItem.color;
+                        item.GetComponent<Changes>().StartChanges();
+                    }
+                       
+                   
                 }
             }
         }
@@ -142,12 +140,11 @@ public class LayerLoader : MonoBehaviour
             if(item == null) 
             {
                 contactService.commCube.GetComponent<Image>().color = Color.red;
-            Debug.Log("Item was null, position: "+item.transform.localPosition.ToString());
-                Debug.Log("couldnt find match in layer recreation ");
-             }
-
+            }
+        Debug.Log("objects to load was sent back "+ parentObject.tag.ToString());
         return loadedObjects;
     }
+
 
 
     public string TransformStringFromData(Transform transform)
@@ -189,32 +186,25 @@ public class LayerLoader : MonoBehaviour
 
     public string SaveBlocks(string layerName = "none")
     {
-        //layerName = authMSc.userData.name;
-        Debug.Log("LayerName: " + layerName);
         GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName); 
         if (blocks.Length == 0)
             return 0.ToString();
         string[] upBlocks = new string[blocks.Length];
-        //int i = 0;
-        
+     
         for (int i = 0; i < blocks.Length; i++)
         {
+           /* if (blocks[i].transform.childCount==1)
+                buildSc.openModelCount--;*/
             var postLayerI = new LayerItem();
-
-            postLayerI.name = layerName; //tag?
+            postLayerI.name = layerName;
             postLayerI.objectType = blocks[i].name.Replace('/', '_');
-            
             postLayerI.transform = TransformStringFromData(blocks[i].transform);
             postLayerI.color = blocks[i].GetComponentInChildren<Renderer>().material.color;
-
             Destroy(blocks[i].gameObject);
             upBlocks[i]= JsonUtility.ToJson(postLayerI);
         }
         
         var postStrinsArr=JsonHelper.ToJson(upBlocks);
-        
-        Debug.Log("string jlist2: " + postStrinsArr);
-        
             return postStrinsArr;
     }
 
@@ -224,9 +214,6 @@ public class LayerLoader : MonoBehaviour
         var doneModelArray = SaveBlocks(layerName);
         if (doneModelArray == 0.ToString())
             return;
-        Debug.Log("doneModelArray: " + doneModelArray);
-        
-        //var jlayer = JsonUtility.ToJson(doneModelArray);
         var upProjectItem = new Project
         {
             name = "Demo",
@@ -237,7 +224,6 @@ public class LayerLoader : MonoBehaviour
         };
 
         var jProjectItem = JsonUtility.ToJson(upProjectItem);
-        Debug.Log("Posting ProjectItem+ " + jProjectItem);
         StartCoroutine(contactService.PostData_Coroutine(jProjectItem, "http://"+authMSc.ipAddress+":3000/projects"));
     }
 

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,10 +11,15 @@ public class LoadLayer : MonoBehaviour
     public string data;
     public string data2;
     public Button btn;
+    public GameObject loadedParent;
 
     public void Loading()
     {
         GameObject.Find("Building").GetComponent<Build>().LoadingLayer(data2,data, transform.gameObject.GetComponent<Button>());
     }
-   
+
+
+
+
+
 }

@@ -22,6 +22,7 @@ using Unity.XR.CoreUtils;
 /// 
 /// Handling Layers UI
 /// Calling layer list
+/// Clearing LayerList
 /// Calling Loading Layer
 /// </summary>
 /// 
@@ -43,13 +44,28 @@ public class Build : PressINputBase
     bool isPressed;
     public XROrigin arSessionOrigin;
     public Camera arCamera;
+    public int openModelCount=0;
 
-    [HideInInspector]
+    
     public GameObject selectedGo;
     
     public Vector3 coordinateSystemPos;
     public bool isCoordinateSystemSet = false;
+    public Color loadedButton;
+    public TMP_Text changeText;
 
+    /// <summary>
+    /// Handling all controller button press
+    /// Press funtions for touch
+    ///      /// Changing color
+    ///      ///Choosing GameObject
+    /// Handling Layers UI
+    /// Calling layer list
+    /// Calling Loading Layer
+    /// GetProjectNameByID
+    /// IDtoName
+    /// IsPointerOverGameObject()
+    /// </summary>
 
     protected override void Awake()
     {
@@ -63,14 +79,9 @@ public class Build : PressINputBase
         arCamera = arSessionOrigin.Camera;
         loaderSc = GameObject.Find("Building").GetComponent<LayerLoader>();
         contactService = GameObject.Find("AuthManager").GetComponent<ContactService>();
-        //xRManager= GetComponent<XRInteractionManager>();
         authMSc = GameObject.Find("AuthManager").GetComponent<authManager>();
-        
         notesManager = GameObject.Find("NotesUIDocker").GetComponent<NotesManager>();
       
-        
-
-
     }
 
     // Update is called once per frame
@@ -81,22 +92,28 @@ public class Build : PressINputBase
             coordinateSystemPos = GameObject.Find("CoordinateSystem").transform.position; 
             isCoordinateSystemSet=true;
         }
-        if (Input.touchCount > 0 && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+        if (Input.touchCount > 0) //&& !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
         {
             Touch touch = Input.GetTouch(0);
 
+            // Check if touch is over a UI element first
+            if (IsPointerOverGameObject())//EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+            {
+                Debug.Log("Touch on UI, ignoring interaction with AR objects.");
+                return;
+            }
             // Only process the touch when it begins
             if (touch.phase == UnityEngine.TouchPhase.Began)
             {
                 var touchPosition = touch.position;
 
-                if (isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                if (isInBuildMode)// && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
                     BuildBlocks();
 
                     Debug.Log("Sensed Something In Build"); //it should never get here in android
                 }
-                else if (!isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                else// if (!isInBuildMode && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                 {
                     Ray ray = arCamera.ScreenPointToRay(touchPosition);
                     if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
@@ -108,11 +125,15 @@ public class Build : PressINputBase
                         {
                             if (selectedGo != null)
                             {
+                                Debug.Log("emission out");
                                 selectedGo.GetComponent<MeshRenderer>().material.EnableKeyword("_EMISSION");
                                 selectedGo.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.white * 0.0f);
+                                
                             }
                             selectedGo = hitObject;
                             selectedGo.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", Color.cyan * 0.4f);
+                            
+                            Debug.Log("emission on");
                             if (notesManager.gOname)
                                 notesManager.gOname.GetComponentInChildren<TMP_Text>().text = selectedGo.name;
                             notesManager.gOpos.GetComponentInChildren<TMP_Text>().text = selectedGo.transform.localPosition.ToString();
@@ -122,20 +143,29 @@ public class Build : PressINputBase
                         {
                             Debug.Log("In color Mode");
                             Changes changesComponent = selectedGo.GetComponentInChildren<Changes>();
-                            if (changesComponent != null)
+                            if (changesComponent!=null)
                             {
+                                Debug.Log("had changes onit");
                                 changesComponent.ChangeColor();
+                                contactService.commCube.GetComponent<Image>().color = Color.clear;
                             }
-                            else
+                           /* else
                             {
+                                
+                                Debug.Log("Added changes in build");
                                 if (selectedGo.GetComponent<Renderer>())
+                                {
+                                    contactService.commCube.GetComponent<Image>().color = Color.magenta;
+                                    selectedGo.AddComponent<Changes>();
+                                    StartCoroutine(selectedGo.AddComponent<Changes>().ChangesStart());
                                     selectedGo.AddComponent<Changes>().ChangeColor();
-                                //else if (selectedGo.GetComponentInChildren<Renderer>())
-                                   // selectedGo.transform.GetChild(1).AddComponent<Changes>().ChangeColor();
-                            }
+                                }
+                                
+
+                            }*/
                         }
 
-                        contactService.commCube.GetComponent<Image>().color = Color.white;
+                        //contactService.commCube.GetComponent<Image>().color = Color.white;
                     }
                 }
             }
@@ -149,30 +179,17 @@ public class Build : PressINputBase
     protected override void OnPressCancel() => isPressed = false;
     public void OnLayerListDis()
     {
+        changeText.text = "Layer List";
         for (var i = savedContent.transform.childCount - 1; i >= 0; i--)
         {
-            if(savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color==Color.white)
+            if(savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color==Color.white || savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color ==loadedButton)
             Destroy(savedContent.transform.GetChild(i).gameObject);
         }
     }
 
-
-    public void Clear()
-    {
-        string layerName = loaderSc.layerTitleText.text;
-        if (DoesTagExist(layerName))
-        {
-            GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
-            foreach (var block in blocks)
-            {
-                Destroy(block.gameObject);
-            }
-        }
-    }
-
-
     public void OnLayerEn()
     {
+        changeText.text = "Open Layers";
         GetLayerListByName();
     }
 
@@ -182,6 +199,8 @@ public class Build : PressINputBase
         
     }
 
+
+
     public void ToConsole(List<Project> layers)
     {
         
@@ -189,9 +208,8 @@ public class Build : PressINputBase
         {
             if (layer.model.Contains("objectType"))
             {
-                Debug.Log("Layers: " + layer.layername);
                 var nN = Instantiate(listItem, savedContent.transform);
-                nN.transform.SetSiblingIndex(0);
+                nN.transform.SetSiblingIndex(openModelCount);
                 nN.transform.GetComponentInChildren<TMP_Text>().text = layer.layername + " " + layer.start;
                 nN.gameObject.name = layer.model;
                 nN.gameObject.AddComponent<LoadLayer>().data = layer.model;
@@ -204,41 +222,72 @@ public class Build : PressINputBase
         }
     }
 
-
+    public void Clear()
+    {
+        string layerName = loaderSc.layerTitleText.text;
+        if (DoesTagExist(layerName))
+        {
+            /*
+            if (transform.childCount == 1)
+            {
+                openModelCount--;
+            }
+            */
+            GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
+            foreach (var block in blocks)
+            {
+                Destroy(block.gameObject);
+            }
+        }
+    }
     public void LoadingLayer(string layerName, string layerModel, Button button)
     {
-            Debug.Log("LayerName: "+layerName+" Model: "+layerModel+" Button: "+button.name);
-        if (button.transform.GetComponent<Image>().color==Color.white)
+        Debug.Log("button color: " + button.transform.GetComponent<Image>().color);
+        if (button.transform.GetComponent<Image>().color==Color.white || button.transform.GetComponent<Image>().color == loadedButton)
         {
-        button.transform.GetComponent<Image>().color = Color.green;
-            //other options for tag replacement
-            //create tag
-            //or own dictionary?
-            //create basic tags
-            
+            button.transform.GetComponent<Image>().color = Color.green;
             if (DoesTagExist(layerName))
             {
-                Debug.Log("IN TAG");
-                var loadedObjects=loaderSc.LayerJsonToLayerBegin(layerName, layerModel);
-                button.onClick.AddListener(() => { UnloadLayer(loadedObjects); });
+                var parentObject=loaderSc.LayerJsonToLayerBegin(layerName, layerModel);
+                openModelCount++;
+                button.GetComponent<LoadLayer>().loadedParent = parentObject;
+                //button.onClick.AddListener(() => { button.GetComponent<LoadLayer>().UnLoad(); });
+                Debug.Log("addlistener was added: " + button.name+" count of objects: "+parentObject.transform.childCount );
             }
 
         }
         else
         {
-            button.transform.GetComponent<Image>().color = Color.white;
-           
+            button.transform.GetComponent<Image>().color = loadedButton;
+            openModelCount--;
+            Debug.Log("UnLoading was called");
+            if(button.GetComponent<LoadLayer>().loadedParent)
+            {
+                 foreach (var child in button.GetComponent<LoadLayer>().loadedParent.transform.GetComponentsInChildren<Transform>())
+                    {
+                        Destroy(child.gameObject);
+                    }
+                        Destroy(button.GetComponent<LoadLayer>().loadedParent);
+            }
            
         }
     }
 
-    public void UnloadLayer(List<GameObject> objects)
+    /*
+    public void UnLoad()
     {
-        foreach(var obj in objects)
+        Debug.Log("UnLoad was called");
+        GameObject.Find("Building").GetComponent<Build>().openModelCount--;
+        foreach (var child in loadedParent.transform.GetComponentsInChildren<Transform>())
         {
-            Destroy(obj.gameObject);
+            Destroy(child.gameObject);
         }
+        Destroy(loadedParent);
+        Debug.Log("data2: " + data2 + " data: " + data);
+        this.gameObject.GetComponent<Button>().onClick.AddListener(() => this.gameObject.GetComponent<LoadLayer>().Loading());
     }
+    */
+
 
     public static bool DoesTagExist(string aTag)
     {
@@ -266,7 +315,7 @@ public class Build : PressINputBase
     }
     public void BuildBlocks()
     {
-      
+      /*
         if (isInBuildMode)
         {
             
@@ -277,7 +326,7 @@ public class Build : PressINputBase
                 cube.tag="Cube";
             }
         }
-      
+      */
     }
 
   
@@ -296,5 +345,19 @@ public class Build : PressINputBase
         return project.name; 
     }
 
-    
+    public static bool IsPointerOverGameObject()
+    {
+        //check mouse
+        if (EventSystem.current.IsPointerOverGameObject())
+            return true;
+
+        //check touch
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == UnityEngine.TouchPhase.Began)
+        {
+            if (EventSystem.current.IsPointerOverGameObject(Input.touches[0].fingerId))
+                return true;
+        }
+
+        return false;
+    }
 }

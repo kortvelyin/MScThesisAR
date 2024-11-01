@@ -72,6 +72,7 @@ public class authManager : MonoBehaviour
                 data.transform.Find("company").gameObject.GetComponent<TMP_Text>().text = user.company;
                 data.transform.Find("job").gameObject.GetComponent<TMP_Text>().text = user.job;
                 data.transform.Find("title").gameObject.GetComponent<TMP_Text>().text = user.title;
+
                 baseUser_id = user.ID.ToString();
                 if(loginScreenUI==null)
                     loginScreenUI = GameObject.Find("LoginScreenUI").GetComponent<LoginScreenUI>();

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -10,21 +11,26 @@ using UnityEngine;
 public class Changes : MonoBehaviour
 {
     //Original data
-    [HideInInspector]
+    //[HideInInspector]
     public Color ogColor;
-    [HideInInspector]
+    //[HideInInspector]
     public Material ogMaterial;
-    [HideInInspector]
+    //[HideInInspector]
     public Transform ogTransform;
-    Color changeA;
+    public Color gotColor;
 
-    // Start is called before the first frame update
-    void Start()
+
+    public void StartChanges()
     {
-        ogColor=gameObject.GetComponent<Renderer>().material.color;
-        ogMaterial = gameObject.GetComponent<Material>();
+        //Debug.Log("Changes script started");
+        ogMaterial = gameObject.GetComponent<Renderer>().material;
+        ogColor = ogMaterial.color;
+        gameObject.GetComponent<Renderer>().material.color = gotColor;
         ogTransform = gameObject.transform;
+        //Debug.Log("Changes object name: " + gameObject.name + " .og color" + GetComponent<Changes>().ogColor.ToString());
     }
+
+
 
    public void ChangeColor()
     {
