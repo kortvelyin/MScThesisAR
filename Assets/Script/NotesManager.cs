@@ -6,8 +6,6 @@ using UnityEngine.UI;
 using Newtonsoft.Json;
 using System;
 
-
-//using UnityEngine.UIElements;
 /// <summary>
 /// Handling the Note creation, listing, communication with DB
 /// Everything that has to do with the notes. 
@@ -94,14 +92,15 @@ public class NotesManager : MonoBehaviour
             {
                 var trans = JsonHelper.FromJson<string>(note.position);
                 
-                if (JsonConvert.DeserializeObject<Vector3>(trans[0])!=Vector3.zero &&note.gobject!="Select Object" && note.gobject!= "ARTrackedImage 00000000000BF9A0-0000000000000000")
+                if (trans[0] != "" || trans[1] != "")
                 {
                     Debug.Log("the vector3: " + JsonConvert.DeserializeObject<Vector3>(trans[0]));
                     
                     loaderSc.userParentObject.transform.parent = GameObject.Find("CoordinateSystem").transform;
 
-                    parentObject.transform.parent = loaderSc.userParentObject.transform;
-                    lN = Instantiate(layerNote,parentObject.transform);//make the pop ups of notes
+                    parentObject.transform.parent = GameObject.Find("dorottyahotel").transform;
+
+                    var lN = Instantiate(layerNote,parentObject.transform.parent);//make the pop ups of notes
                     lN.gameObject.tag = "Note";
                     //var trans = JsonHelper.FromJson<string>(note.position);
 
@@ -131,22 +130,25 @@ public class NotesManager : MonoBehaviour
 
     public void AddNoteToDB()
     {    
-        var goN = Instantiate(layerNote, parentObject.transform);
+
+        var goN = Instantiate(layerNote, GameObject.Find("dorottyahotel").transform);
         Transform transform= gameObject.transform;
         string[] trans = new String[2];
         if (buildSc.selectedGo != null)
         {
-            goN.transform.localPosition = Vector3.MoveTowards(buildSc.selectedGo.transform.localPosition, Camera.main.transform.localPosition, step);
+            goN.transform.position = Vector3.MoveTowards(buildSc.selectedGo.transform.position, Camera.main.transform.position, 1);
             trans[0] = JsonUtility.ToJson(goN.transform.localPosition);
             goN.AddComponent<PopUpNoteRotation>();
             trans[1] = JsonUtility.ToJson(goN.transform.localRotation);
+            trans[0] = JsonUtility.ToJson(goN.transform.localPosition);
         }
         else
-            trans[0] = JsonUtility.ToJson(Vector3.zero);
+        {
+            trans[0] = "";
+            trans[1] = "";
+        }
 
-        
-        
-        
+
         var jtrans = JsonHelper.ToJson(trans);
         Notes note = new()
         {

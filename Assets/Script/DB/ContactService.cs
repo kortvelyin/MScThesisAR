@@ -98,7 +98,7 @@ public class ContactService : MonoBehaviour
     public IEnumerator PostData_Coroutine(string json, string uri)
     {
         Debug.Log("In post: "+json+" url: "+uri);
-        commCube.GetComponent<Image>().color = Color.blue;
+        commCube.GetComponent<Image>().color = Color.yellow;
         //jnote= JsonUtility.ToJson(note);
         using (UnityWebRequest www = UnityWebRequest.Post(uri, json, "application/json"))
         {
@@ -112,7 +112,7 @@ public class ContactService : MonoBehaviour
             else
             {
                 Debug.Log("Form upload complete!: "+ json);
-                commCube.GetComponent<Image>().color = Color.grey;
+                commCube.GetComponent<Image>().color = Color.green;
             }
         }
     }
@@ -121,7 +121,7 @@ public class ContactService : MonoBehaviour
    public IEnumerator GetRequest(string uri)
     {
         
-        commCube.GetComponent<Image>().color = Color.cyan;
+        commCube.GetComponent<Image>().color = Color.yellow;
         using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
         {
             yield return webRequest.SendWebRequest();

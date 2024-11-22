@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class PopUpNoteRotation : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
+    //x=y and z=-4.768373e-07
     // Update is called once per frame
     void Update()
     {
-        this.transform.localRotation.SetLookRotation(Camera.main.transform.position);
+        this.gameObject.transform.LookAt(Camera.main.transform.position);
     }
 }

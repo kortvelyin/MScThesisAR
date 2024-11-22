@@ -55,7 +55,7 @@ public class LayerLoader : MonoBehaviour
         
         contactService = GameObject.Find("AuthManager").GetComponent<ContactService>();
         authMSc = GameObject.Find("AuthManager").GetComponent<authManager>();
-       }
+    }
 
  
     public GameObject LayerJsonToLayerBegin(string layerName, string layer)
@@ -125,7 +125,7 @@ public class LayerLoader : MonoBehaviour
                         Debug.Log("Place Cubes was added");
                         item.AddComponent<PlaceCubes>().transforms=transfromArray;
                     }
-                   if (item.GetComponent<Renderer>())
+                    if (item.GetComponent<Renderer>())
                     {
                         item.AddComponent<Changes>();//.ogMaterial = item.GetComponent<Renderer>().material;
                          item.GetComponent<Changes>().gotColor = lItem.color;
@@ -217,7 +217,7 @@ public class LayerLoader : MonoBehaviour
         var upProjectItem = new Project
         {
             name = "Demo",
-            start = System.DateTime.Today.ToString(),
+            start = System.DateTime.Now.ToString(),
             finish = "2024.07.04.",
             layername = layerName,
             model = doneModelArray

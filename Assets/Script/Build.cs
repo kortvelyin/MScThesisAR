@@ -119,7 +119,7 @@ public class Build : PressINputBase
                     if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
                     {
                         Debug.Log("Touch sensed");
-                        contactService.commCube.GetComponent<Image>().color = Color.blue; // blue if hit
+                        contactService.commCube.GetComponent<Image>().color = Color.white; // blue if hit
                         GameObject hitObject = hit.transform.gameObject;
                         if (selectedGo != hitObject)
                         {
@@ -147,25 +147,12 @@ public class Build : PressINputBase
                             {
                                 Debug.Log("had changes onit");
                                 changesComponent.ChangeColor();
-                                contactService.commCube.GetComponent<Image>().color = Color.clear;
+                                
                             }
-                           /* else
-                            {
-                                
-                                Debug.Log("Added changes in build");
-                                if (selectedGo.GetComponent<Renderer>())
-                                {
-                                    contactService.commCube.GetComponent<Image>().color = Color.magenta;
-                                    selectedGo.AddComponent<Changes>();
-                                    StartCoroutine(selectedGo.AddComponent<Changes>().ChangesStart());
-                                    selectedGo.AddComponent<Changes>().ChangeColor();
-                                }
-                                
-
-                            }*/
+                         
                         }
 
-                        //contactService.commCube.GetComponent<Image>().color = Color.white;
+                        
                     }
                 }
             }
@@ -182,7 +169,7 @@ public class Build : PressINputBase
         changeText.text = "Layer List";
         for (var i = savedContent.transform.childCount - 1; i >= 0; i--)
         {
-            if(savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color==Color.white || savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color ==loadedButton)
+            if(savedContent.transform.GetChild(i).gameObject.GetComponent<Image>().color != Color.green)
             Destroy(savedContent.transform.GetChild(i).gameObject);
         }
     }
@@ -213,11 +200,17 @@ public class Build : PressINputBase
                 nN.transform.GetComponentInChildren<TMP_Text>().text = layer.layername + " " + layer.start;
                 nN.gameObject.name = layer.model;
                 nN.gameObject.AddComponent<LoadLayer>().data = layer.model;
-
                 nN.gameObject.GetComponent<LoadLayer>().data2 = layer.layername;
-
                 nN.gameObject.GetComponent<LoadLayer>().btn = nN;
                 nN.onClick.AddListener(() => nN.gameObject.GetComponent<LoadLayer>().Loading());
+
+                for (int i = 0; i < openModelCount; i++)
+                {
+                    if (savedContent.transform.GetChild(i).gameObject.GetComponentInChildren<TMP_Text>().text == nN.transform.GetComponentInChildren<TMP_Text>().text)
+                    {
+                        nN.transform.GetComponentInChildren<Image>().color = Color.gray;
+                    }
+                }
             }
         }
     }
@@ -227,12 +220,6 @@ public class Build : PressINputBase
         string layerName = loaderSc.layerTitleText.text;
         if (DoesTagExist(layerName))
         {
-            /*
-            if (transform.childCount == 1)
-            {
-                openModelCount--;
-            }
-            */
             GameObject[] blocks = GameObject.FindGameObjectsWithTag(layerName);
             foreach (var block in blocks)
             {
@@ -251,12 +238,11 @@ public class Build : PressINputBase
                 var parentObject=loaderSc.LayerJsonToLayerBegin(layerName, layerModel);
                 openModelCount++;
                 button.GetComponent<LoadLayer>().loadedParent = parentObject;
-                //button.onClick.AddListener(() => { button.GetComponent<LoadLayer>().UnLoad(); });
                 Debug.Log("addlistener was added: " + button.name+" count of objects: "+parentObject.transform.childCount );
             }
 
         }
-        else
+        else if (button.transform.GetComponent<Image>().color == Color.green)
         {
             button.transform.GetComponent<Image>().color = loadedButton;
             openModelCount--;

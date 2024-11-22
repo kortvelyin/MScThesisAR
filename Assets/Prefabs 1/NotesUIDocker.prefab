@@ -101,6 +101,7 @@ MonoBehaviour:
   headCamera: {fileID: 0}
   newNote: {fileID: 238619816721120700}
   savedNotes: {fileID: 3964228747768213430}
+  step: 1
   savedNotePrefab: {fileID: 1302453097221575638, guid: e75d388cd17b8394c89bc4e9e443052d, type: 3}
   savedContext: {fileID: 5682613202622683693}
   oneContext: {fileID: 0}
@@ -112,6 +113,7 @@ MonoBehaviour:
   layerNote: {fileID: 0}
   textNote: {fileID: 0}
   titleNote: {fileID: 0}
+  parentObject: {fileID: 0}
 --- !u!114 &7475296329312860713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3673,7 +3675,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0004695244, y: 0.00389819}
+  m_AnchoredPosition: {x: -468.34537, y: 0.00389819}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &8540679291873033759
@@ -3967,7 +3969,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -19638.078, y: -3.6363}
+  m_AnchoredPosition: {x: -35732.633, y: -3.6363}
   m_SizeDelta: {x: 0, y: 30.6306}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1515937356317128692
@@ -4130,8 +4132,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7748218671869871479}
   m_HandleRect: {fileID: 8902547011128289044}
   m_Direction: 2
-  m_Value: 0.99985725
-  m_Size: 0.857482
+  m_Value: 0.9999346
+  m_Size: 0.80081534
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4484,7 +4486,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 7309421295425802121}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.9999686
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4557,8 +4559,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 8471596214950240985}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.19918466}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0.19917163}
+  m_AnchorMax: {x: 1, y: 0.999987}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
