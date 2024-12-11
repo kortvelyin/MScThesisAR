@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using TMPro;
 using UnityEngine.UI;
 using Newtonsoft.Json;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Main functions to the Build.cs
@@ -41,7 +42,8 @@ public class LayerLoader : MonoBehaviour
     Build buildSc;
     public bool isInColorMode;
     public TMP_Text layerTitleText;
-
+    public List<GameObject> loadedObjects;
+    
 
 
     private void Start()
@@ -78,14 +80,14 @@ public class LayerLoader : MonoBehaviour
            
             LayerInfoToLayer(layer, parentObject, layerName);
         }
+        else if (layer.Contains("htt"))
+        {
+            StartCoroutine(GetAssetBundle(layer, parentObject, layerName));
+        }
         else if(layer.Contains("Item"))//with jsonHelper
         {
             if (layer.Contains("objectType"))
                 loadedObjects=LayerInfoToLayer(layer, parentObject, layerName);
-        }
-        else if (layer.Contains("htt"))
-        {
-            StartCoroutine(GetAssetBundle(parentObject,layer));
         }
         else
         {
@@ -116,7 +118,6 @@ public class LayerLoader : MonoBehaviour
                     item.name = lItem.objectType;
                     item.transform.parent = parentObject.transform;
                     var transfromArray= JsonHelper.FromJson<String>(lItem.transform);
-
                     item.transform.localPosition = JsonUtility.FromJson<Vector3>(transfromArray[0]);
                     item.transform.localRotation = JsonUtility.FromJson<Quaternion>(transfromArray[1]);
                     item.transform.localScale = JsonUtility.FromJson<Vector3>(transfromArray[2]);
@@ -156,31 +157,78 @@ public class LayerLoader : MonoBehaviour
 
         return JsonHelper.ToJson(transformArray);
     }
-    IEnumerator GetAssetBundle(GameObject parent, string layer)
+    public IEnumerator GetAssetBundle(string model, GameObject parentObject, string layerName)
     {
-        var layerData = JsonConvert.DeserializeObject<Project>(layer);
-        UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(layerData.model);
-        yield return www.SendWebRequest();
+        loadedObjects = new List<GameObject>();
+        var layerItemList = JsonHelper.FromJson<string>(model);
+        GameObject item = null;
+        string driveurl = "https://drive.usercontent.google.com/u/0/uc?id=1IZxxjHIlJIcHO2p35wjQbT8iMRGPr9rP&export=download";
 
-        if (www.result != UnityWebRequest.Result.Success)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(www);
-            var loadAsset = bundle.LoadAllAssets();
-            yield return loadAsset;
 
-            foreach (var asset in loadAsset)
+
+        foreach (var layerItem in layerItemList)
+        {
+            LayerItem lItem = JsonUtility.FromJson<LayerItem>(layerItem);
+            lItem.objectType = lItem.objectType.Replace("_", "/");
+            Debug.Log("URL: " + lItem.objectType);
+            using (UnityWebRequest www = UnityWebRequestAssetBundle.GetAssetBundle(lItem.objectType, 0))
             {
-                Instantiate(asset, parent.transform);
-            }
+                yield return www.SendWebRequest();
 
+                if (www.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.Log("assetbundle problem" + www.error);
+                }
+                else
+                {
+                    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(www);
+
+                    GameObject go = bundle.LoadAsset(bundle.GetAllAssetNames()[0]) as GameObject;
+                    item = Instantiate(go);
+                    loadedObjects.Add(item);
+                    
+
+                    item.tag = layerName;
+                    parentObject.tag = layerName; //so that this gets destroyed too
+                    item.name = lItem.objectType;
+                    item.transform.parent = parentObject.transform;
+                    var transfromArray = JsonHelper.FromJson<String>(lItem.transform);
+                    item.transform.localPosition = JsonUtility.FromJson<Vector3>(transfromArray[0]);
+                    item.transform.localRotation = JsonUtility.FromJson<Quaternion>(transfromArray[1]);
+                    item.transform.localScale = JsonUtility.FromJson<Vector3>(transfromArray[2]);
+                    
+
+
+                    for (int i = 0; i < item.transform.childCount; i++)
+                    {
+                        if (item.transform.GetChild(i).GetComponent<Renderer>())
+                        {
+                            var materials = item.transform.GetChild(i).GetComponent<Renderer>().materials;
+                            foreach (var material in materials)
+                            {
+                                material.shader = Shader.Find("Standard");
+                            }
+                            item.transform.GetChild(i).AddComponent<BoxCollider>().isTrigger = true;
+                            item.transform.GetChild(i).AddComponent<Changes>();//.ogMaterial = item.GetComponent<Renderer>().material;
+
+                            item.transform.GetChild(i).GetComponent<Changes>().gotColor = lItem.color;
+                            item.transform.GetChild(i).GetComponent<Changes>().StartChanges();
+                        }
+                    }
+                    bundle.Unload(false);
+                    yield return new WaitForEndOfFrame();
+                }
+                www.Dispose();
+
+            }
         }
+
+
+
     }
 
-   
+
+
 
 
 

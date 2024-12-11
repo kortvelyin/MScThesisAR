@@ -23,9 +23,9 @@ public class Changes : MonoBehaviour
     public void StartChanges()
     {
         //Debug.Log("Changes script started");
-        ogMaterial = gameObject.GetComponent<Renderer>().material;
+        ogMaterial = gameObject.GetComponentInChildren<Renderer>().material;
         ogColor = ogMaterial.color;
-        gameObject.GetComponent<Renderer>().material.color = gotColor;
+        gameObject.GetComponentInChildren<Renderer>().material.color = gotColor;
         ogTransform = gameObject.transform;
         //Debug.Log("Changes object name: " + gameObject.name + " .og color" + GetComponent<Changes>().ogColor.ToString());
     }
@@ -34,21 +34,21 @@ public class Changes : MonoBehaviour
 
    public void ChangeColor()
     {
-        if(gameObject.GetComponent<Renderer>().material.color == ogColor)
+        if(gameObject.GetComponentInChildren<Renderer>().material.color == ogColor)
         {
-            gameObject.GetComponent<Renderer>().material.color = Color.green;
+            gameObject.GetComponentInChildren<Renderer>().material.color = Color.green;
         }
-        else if (gameObject.GetComponent<Renderer>().material.color == Color.green)
+        else if (gameObject.GetComponentInChildren<Renderer>().material.color == Color.green)
         {
-            gameObject.GetComponent<Renderer>().material.color = Color.yellow;
+            gameObject.GetComponentInChildren<Renderer>().material.color = Color.yellow;
         }
-        else if (gameObject.GetComponent<Renderer>().material.color == Color.yellow)
+        else if (gameObject.GetComponentInChildren<Renderer>().material.color == Color.yellow)
         {
-            gameObject.GetComponent<Renderer>().material.color = Color.red;
+            gameObject.GetComponentInChildren<Renderer>().material.color = Color.red;
         }
-        else if (gameObject.GetComponent<Renderer>().material.color == Color.red)
+        else if (gameObject.GetComponentInChildren<Renderer>().material.color == Color.red)
         {
-            gameObject.GetComponent<Renderer>().material.color = ogColor;
+            gameObject.GetComponentInChildren<Renderer>().material.color = ogColor;
 
         }
        
